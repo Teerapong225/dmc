@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>DMC - Food Type Analysis For Country</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <!-- Responsive navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container px-lg-5">
+            <a href="index.html" class="navbar-brand">Food Type Analysis For Country</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Header-->
+    <header class="py-5">
+        <div class="container px-lg-5">
+            <div class="p-4 p-lg-5 bg-light rounded-3 text-center">
+                <img src="assets/logo.png" alt="Diamond Cliff Food Analysis" class="img-fluid mb-4 mt-n5"
+                    style="max-width: 25%; height: auto; border-radius: 10px;">
+                <div class="m-4 m-lg-5">
+                    <h1 class="display-5 fw-bold">Welcome to Diamond Cliff Food Analysis</h1>
+                    <p class="fs-4">This website showcases a curated selection of our guests' favorite dishes at Diamond
+                        Cliff, categorized by country. We analyze customer orders from various nations and rank the most
+                        popular dishes, providing valuable insights into the top culinary preferences of our
+                        international guests.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Page Content-->
+    <div class="container mt-4 py-5 bg-light rounded-3 ">
+        <label for="countrySelect" class="form-label"> Please Select a Country:</label>
+
+        <body>
+            <div class="custom-dropdown">
+                <button class="form-select" type="button" id="countryDropdown" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Select Country
+                </button>
+                <ul class="dropdown-menu scrollable-menu" id="countryList">
+                    <input type="text" id="countrySearch" class="form-control" placeholder="Search for country..." />
+                </ul>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    // Fetch data from REST Countries API
+                    $.get('https://restcountries.com/v3.1/all', function (countries) {
+                        // เรียงประเทศตามชื่อ
+                        countries.sort((a, b) => a.name.common.localeCompare(b.name.common));
+
+                        countries.forEach(function (country) {
+                            let countryName = country.name.common;
+                            let countryCode = country.cca2 ? country.cca2.toLowerCase() : "";
+                            let flagIcon = countryCode ? `<span class="flag-icon flag-icon-${countryCode}"></span>` : "";
+
+                            $('#countryList').append(
+                                `<li><a class="dropdown-item" href="#" data-value="${countryName}">
+                                    ${flagIcon} ${countryName}
+                                </a></li>`
+                            );
+                        });
+                    });
+
+                    // เมื่อเลือกประเทศ ให้เปลี่ยนข้อความปุ่ม
+                    $(document).on('click', '.dropdown-item', function () {
+                        let selectedCountry = $(this).text().trim();
+                        $('#countryDropdown').text(selectedCountry);
+                    });
+
+                    // ฟังก์ชันค้นหาประเทศ
+                    $('#countrySearch').on('keyup', function () {
+                        let searchQuery = $(this).val().toLowerCase();
+                        let found = false
+                        $('#countryList li').each(function () {
+                            let countryName = $(this).text().toLowerCase();
+                            if (countryName.indexOf(searchQuery) !== -1) {
+                                $(this).show();
+                                found = true;
+                            } else {
+                                $(this).hide();
+                            }
+                        });
+                    });
+                });
+            </script>
+        </body>
+
+
+        <div class="container mt-4">
+            <label for="foodTypeSelect" class="form-label">Please Select Food Type:</label>
+            <div class="custom-dropdown">
+                <select id="foodTypeSelect" class="form-select">
+                    <option value="All" selected>All</option>
+                </select>
+            </div>
+            <!-- Input Field กำหนดจำนวนอันดับ -->
+            <br><label for="rankInput" class="form-label mt-3">Enter number of top foods to display (max: 99):</label>
+            <div class="custom-dropdown">
+                <input type="number" id="rankInput" class="form-control" value="10" min="1" max="99"
+                    oninput="validateRankInput()">
+            </div>
+            <script>
+                function validateRankInput() {
+                    let input = document.getElementById("rankInput");
+                    // if (input.value === "")input.value  // ถ้าเป็นช่องว่างไม่ต้องทำอะไร
+                    if (input.value < 1) input.value = 1;  // ถ้าเป็นค่าต่ำกว่า 1 ให้ตั้งค่าเป็น 1
+                    if (input.value > 99) input.value = 99;  // ถ้ามากกว่า 99 ก็ให้ตั้งเป็น 99
+                }
+                // ประเภท Food Type
+                const foodTypes = [
+                    "Food", "Wine", "Beer", "Non Alc Bev",
+                    "Spirit", "Misc", "Tobacco", "Gift Shop",
+                    "Boutique"
+                ];
+
+                foodTypes.sort();
+
+                // เพิ่ม Food Type ลงใน Dropdown
+                const foodTypeSelect = document.getElementById("foodTypeSelect");
+                foodTypes.forEach((type) => {
+                    const option = new Option(type, type); // ใช้ type เป็นทั้งค่าและชื่อ
+                    foodTypeSelect.add(option);
+                });
+            </script>
+        </div>
+
+        <div class="container mt-4">
+            <!-- Dropdown Row: "form" -->
+            <div class="row mb-3">
+                <div class="col-1 d-flex align-items-center">
+                    <label class="form-label">Form</label>
+                </div>
+                <div class="col">
+                    <div class="d-flex">
+                        <select class="form-select" id="yearForm"></select>
+                        <select class="form-select me-2" id="monthForm"></select>
+                        <select class="form-select me-2" id="dayForm"></select>
+                    </div>
+                </div>
+            </div>
+            <!-- Dropdown Row: "to" -->
+            <div class="row mb-3">
+                <div class="col-1 d-flex align-items-center">
+                    <label class="form-label">To</label>
+                </div>
+                <div class="col">
+                    <div class="d-flex">
+                        <select class="form-select" id="yearTo"></select>
+                        <select class="form-select me-2" id="monthTo"></select>
+                        <select class="form-select me-2" id="dayTo"></select>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            // ฟังก์ชันสร้าง Dropdown สำหรับวัน เดือน ปี
+            function populateDateDropdowns(daySelect, monthSelect, yearSelect) {
+                // สร้างรายการปี (เช่น 2000 ถึง 2030)
+                const startYear = 2000;
+                const endYear = 2030;
+                for (let year = startYear; year <= endYear; year++) {
+                    yearSelect.add(new Option(year, year));
+                }
+
+                // สร้างรายการเดือน (January ถึง December)
+                const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                monthNames.forEach((month, index) => {
+                    monthSelect.add(new Option(month, index + 1));
+                });
+
+                // ฟังก์ชันอัปเดตจำนวนวันตามเดือนและปีที่เลือก
+                function updateDays() {
+                    const year = parseInt(yearSelect.value);
+                    const month = parseInt(monthSelect.value);
+                    const daysInMonth = new Date(year, month, 0).getDate();
+
+                    // ล้างรายการวันเก่า
+                    daySelect.innerHTML = "";
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        daySelect.add(new Option(day, day));
+                    }
+                }
+
+                // อัปเดตจำนวนวันเมื่อเปลี่ยนเดือนหรือปี
+                monthSelect.addEventListener("change", updateDays);
+                yearSelect.addEventListener("change", updateDays);
+
+                // ตั้งค่าเริ่มต้น
+                updateDays();
+
+                const currentYear = new Date().getFullYear();
+                const currentMonth = new Date().getMonth() + 1; // เดือนเริ่มที่ 0
+                const currentDay = new Date().getDate();
+
+                // หลังสร้าง Dropdown ปี เดือน วันแล้ว ให้ตั้งค่า Default
+                yearSelect.value = currentYear;
+                monthSelect.value = currentMonth;
+                daySelect.value = currentDay
+            }
+
+            // ใช้งานฟังก์ชันกับ Dropdown "to"
+            populateDateDropdowns(
+                document.getElementById("dayTo"),
+                document.getElementById("monthTo"),
+                document.getElementById("yearTo")
+            );
+
+            // ใช้งานฟังก์ชันกับ Dropdown "form"
+            populateDateDropdowns(
+                document.getElementById("dayForm"),
+                document.getElementById("monthForm"),
+                document.getElementById("yearForm")
+            );
+        </script>
+
+        <div class="text-center mt-3 mb-5">
+            <button id="analyzeButton" class="btn btn-primary btn-lg">Analysis</button>
+        </div>
+
+        <script>
+            document.getElementById("analyzeButton").addEventListener("click", function () {
+                // เก็บค่าประเทศ
+                let selectedCountry = document.getElementById("countryDropdown").innerText.trim();
+
+                // เก็บค่า Food Type
+                let selectedFoodType = document.getElementById("foodTypeSelect").value;
+
+                // เก็บค่าจำนวนอันดับที่ผู้ใช้กรอก
+                let topRank = document.getElementById("rankInput").value;
+
+                // ฟังก์ชันแปลงวันที่จาก Dropdown เป็น DD/MM/YYYY
+                function getFormattedDate(dayId, monthId, yearId) {
+                    let day = document.getElementById(dayId).value.padStart(2, '0');  // ทำให้เป็น 2 หลัก เช่น "01"
+                    let month = document.getElementById(monthId).value.padStart(2, '0');
+                    let year = document.getElementById(yearId).value;
+                    return `${day}/${month}/${year}`;
+                }
+
+                // เก็บค่าวันที่ "To" และ "From"
+                let dateTo = getFormattedDate("dayTo", "monthTo", "yearTo");
+                let dateFrom = getFormattedDate("dayForm", "monthForm", "yearForm");
+
+                // ตรวจสอบว่าผู้ใช้เลือกค่าครบหรือไม่
+                if (!selectedCountry || !selectedFoodType || !dateFrom || !dateTo || !topRank) {
+                    alert("Please select all fields before proceeding.");
+                    return;
+                }
+
+                // สร้าง Query String และส่งไปที่ Country.html
+                let queryString = `Country.html?country=${encodeURIComponent(selectedCountry)}&foodType=${encodeURIComponent(selectedFoodType)}&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}&topRank=${encodeURIComponent(topRank)}`;
+                window.location.href = queryString;
+            });
+        </script>
+
+
+    </div>
+
+    <!-- Footer-->
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">Diamond Cliff Resort & Spa
+                284 Prabaramee Road, Patong Beach, Phuket, Thailand 83150</p>
+        </div>
+    </footer>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+    <link href="css/styles.css?v=2" rel="stylesheet" />
+    <script src="js/scripts.js?v=2"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</body>
+
+</html>

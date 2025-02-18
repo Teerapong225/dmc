@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>DMC - Food Type Analysis For Country</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <!-- Navbar แบบดาร์กและหรูหรา -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-lg">
+        <div class="container px-lg-5">
+            <a href="index.html" class="navbar-brand text-white">
+                <img src="assets/logo.png" alt="Diamond Cliff" class="img-fluid" style="max-width: 30px; height: auto;">
+                Food Type Analysis
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a href="index.html" class="nav-link active">Home</a></li>
+                    <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
+                    <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section สวยงามและหรูหรา -->
+    <header class="bg-dark text-white text-center py-5">
+        <div class="container px-lg-5">
+            <h1 class="display-4 fw-bold mb-4">Welcome to Diamond Cliff Food Analysis</h1>
+            <p class="lead fs-4 mb-4">This website showcases a curated selection of our guests' favorite dishes at
+                Diamond Cliff, categorized by country. We analyze customer orders from various nations and rank the most
+                popular dishes, providing valuable insights into the top culinary preferences of our international
+                guests.</p>
+        </div>
+    </header>
+
+    <!-- แสดงข้อมูลที่ได้รับจาก API -->
+    <div class="container py-5">
+        <h2 id="selectedCountry" class="text-center mb-4" style="font-size: 2rem; color: #2C3E50;"></h2>
+        <h3 id="top_rank" class="text-center mb-5" style="font-size: 1.8rem; color: hsl(6, 22%, 25%);"></h3>
+        <h4 id="dateFrom" class="text-center mb-4" style="font-size: 1.5rem; color: #7F8C8D;"></h4>
+        <h5 id="selectedFoodType" class="text-center mb-5" style="font-size: 1.8rem; color: #E74C3C;"></h5>
+        <div id="results" class="mb-5"></div>
+    </div>
+
+    <div class="container-fluid bg-cover text-center py-5"
+        style="background-image: url('assets/dmc-resort.jpg'); background-size: cover; background-position: center center;">
+        <h2 class="text-white display-4">Exquisite Global Cuisine</h2>
+        <p class="text-white fs-4">Indulge in a curated selection of world-class dishes, crafted to perfection from
+            every corner of the globe.</p>
+    </div>
+
+    <script>
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param) || "Not Selected";
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === "Not Selected") return "Not Selected";
+            let date = new Date(dateStr);
+            if (isNaN(date)) return "Invalid Date";
+            return date.toLocaleDateString("th-TH", { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        let selectedCountry = getQueryParam("country");
+        let top_rank = parseInt(getQueryParam("topRank")) || 10;
+        let selectedFoodType = getQueryParam("foodType");
+        let dateFrom = getQueryParam("dateFrom");
+        let dateTo = getQueryParam("dateTo");
+
+        document.getElementById("selectedCountry").innerText = "" + selectedCountry;
+        document.getElementById("top_rank").innerText = "Top " + top_rank + " Menu Items";
+        document.getElementById("dateFrom").innerText = "Date: " + dateFrom + " - " + dateTo;
+        document.getElementById("selectedFoodType").innerText = "" + selectedFoodType;
+
+        fetch(`http://127.0.0.1:5000/get_data?country=${encodeURIComponent(selectedCountry)}&foodType=${encodeURIComponent(selectedFoodType)}&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`)
+            .then(response => response.json())
+            .then(data => {
+                let resultsContainer = document.getElementById("results");
+                resultsContainer.innerHTML = "";
+
+                if (data.length === 0) {
+                    let groupTitle = document.createElement("h3");
+                    groupTitle.innerText = `${selectedFoodType}`;
+                    groupTitle.className = "fw-bold text-primary mb-4";
+                    resultsContainer.appendChild(groupTitle);
+
+                    let table = document.createElement("table");
+                    table.className = "table table-striped table-hover table-bordered"; // ใช้ Bootstrap Class เพื่อทำให้ตารางดูทันสมัย
+                    table.innerHTML = "<tr><th>Menu Item Name</th></tr><tr><td colspan='1' class='text-center'>No data found.</td></tr>";
+
+                    resultsContainer.appendChild(table);
+                } else {
+                    data.forEach(group => {
+                        let table = document.createElement("table");
+                        table.className = "table table-striped table-hover table-bordered shadow-lg";
+
+                        // เพิ่มแถวใหม่สำหรับแสดง food_type ที่หัวตาราง
+                        if (selectedFoodType === "All") {
+                            let headerRow = document.createElement("tr");
+                            let foodTypeCell = document.createElement("th");
+                            foodTypeCell.colSpan = 3;  // ให้ขยายหลายคอลัมน์
+                            foodTypeCell.classList.add("text-center");
+                            foodTypeCell.style.fontSize = "1.5rem";
+                            foodTypeCell.style.color = "#E74C3C";
+                            foodTypeCell.innerText = `${group.foodType}`;
+                            headerRow.appendChild(foodTypeCell);
+
+                            table.appendChild(headerRow);  // เพิ่มแถวนี้เข้าไปในตาราง
+                        }
+
+                        table.innerHTML += "<tr><th>Rank</th><th>Menu Item Name</th><th>Count</th></tr>";
+
+                        let dataLength = group["Menu Item Name"].length;
+                        for (let index = 0; index < top_rank; index++) {
+                            let rank = index + 1;
+
+                            if (index < dataLength) {
+                                let item = group["Menu Item Name"][index];
+                                let row = `<tr><td>${rank}</td><td>${item["Menu Item Name"]}</td><td>${item["Count"]}</td></tr>`;
+                                table.innerHTML += row;
+                            }
+                        }
+
+                        resultsContainer.appendChild(table);
+                    });
+                }
+            })
+            .catch(error => console.error("Error fetching data:", error));
+    </script>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p class="m-0">Diamond Cliff Resort & Spa, 284 Prabaramee Road, Patong Beach, Phuket, Thailand 83150</p>
+        </div>
+    </footer>
+
+    <!-- Script for Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
