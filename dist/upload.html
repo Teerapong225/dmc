@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>DMC - Food Type Analysis For Country</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body class="py-4">
+    <!-- Responsive navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid px-lg-5">
+            <a href="index.html" class="navbar-brand">Food Type Analysis For Country</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
+                    <li class="nav-item"><a href="SearchAnalysis.html" class="nav-link active"
+                            aria-current="page">Search Data</a></li>
+                    <li class="nav-item"><a a href="upload.html" class="nav-link active" aria-current="page">Upload &
+                            Analyze Files</a></li>
+                    <li class="nav-item"><a a href="DeleteFile.html" class="nav-link active" aria-current="page">Delete
+                            File</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <style>
+        body {
+            background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+        }
+
+        h2,
+        h3,
+        h4 {
+            color: #343a40;
+            font-weight: bold;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            border-radius: 50px;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            z-index: 9999;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .popup.success {
+            background-color: #28a745;
+        }
+
+        .popup.error {
+            background-color: #dc3545;
+        }
+    </style>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <h2 class="text-center mb-5">📁 Upload Merge Files and Analyze Files</h2>
+
+            <div class="card">
+                <h4 class="mb-3">📤 Upload Files</h4>
+                <form id="uploadForm">
+                    <div class="mb-3">
+                        <label for="foodFile" class="form-label">🥗 Food File</label>
+                        <input class="form-control" type="file" id="foodFile" name="foodFile">
+                    </div>
+                    <div class="mb-3">
+                        <label for="countryFile" class="form-label">🌍 Country File</label>
+                        <input class="form-control" type="file" id="countryFile" name="countryFile">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload File</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>🔀 Merge Files</h3>
+                <form id="mergeForm">
+                    <div class="mb-3">
+                        <label for="mergeOption" class="form-label">Select Merge Option</label>
+                        <select class="form-select" id="mergeOption" name="mergeOption" required>
+                            <option value="mergeFood">Merge Food Files</option>
+                            <option value="mergeCountry">Merge Country Files</option>
+                            <option value="mergeBoth">Merge Both Food and Country Files</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Start Merging</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>⚙️ Process Merged Files</h3>
+                <form id="processForm">
+                    <div class="mb-3">
+                        <label for="processOption" class="form-label">Select Process Option</label>
+                        <select class="form-select" id="processOption" name="processOption" required>
+                            <option value="merge">Merge Files Using Primary Keys</option>
+                            <option value="analyze">Analyze Files</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Start Processing</button>
+                </form>
+            </div>
+
+            <div id="popup" class="popup"></div>
+        </div>
+
+        <script>
+            const form = document.getElementById('uploadForm');
+            const popup = document.getElementById('popup');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.status === "success") {
+                        showPopup(`✅ Upload success: ${data.food_file || ""} ${data.country_file || ""}`, true);
+                    } else {
+                        showPopup(`❌ Error: ${data.message}`, false);
+                    }
+                } catch (err) {
+                    showPopup("❌ Upload failed", false);
+                    console.error(err);
+                }
+            });
+
+            function showPopup(message, isSuccess) {
+                popup.textContent = message;
+                popup.className = 'popup ' + (isSuccess ? 'success' : 'error');
+                popup.style.display = 'block';
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 3000);
+            }
+
+            document.getElementById('mergeForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const option = document.getElementById('mergeOption').value;
+
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/merge', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mergeOption: option })
+                    });
+                    const data = await res.json();
+                    showPopup(data.success ? `✅ ${data.message}` : `❌ ${data.message}`, data.success);
+                } catch (err) {
+                    showPopup("❌ Error: " + err.message, false);
+                }
+            });
+
+            document.getElementById('processForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const option = document.getElementById('processOption').value;
+                try {
+                    const res = await fetch('http://127.0.0.1:5000/process', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ processOption: option })
+                    });
+                    const data = await res.json();
+                    showPopup(data.success ? `✅ ${data.message}` : `❌ ${data.message}`, data.success);
+                } catch (err) {
+                    showPopup("❌ Error: " + err.message, false);
+                }
+            });
+        </script>
+
+        <footer class="py-5 bg-dark">
+            <div class="container">
+                <p class="m-0 text-center text-white">Diamond Cliff Resort & Spa
+                    284 Prabaramee Road, Patong Beach, Phuket, Thailand 83150</p>
+            </div>
+        </footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    </body>
+
+</html>

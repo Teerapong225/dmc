@@ -22,20 +22,129 @@
             <a href="index.html" class="navbar-brand">Food Type Analysis For Country</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span>
+            </button>
+
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a href="index.html" class="nav-link active" aria-current="page">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
+                    <li class="nav-item"><a href="SearchAnalysis.html" class="nav-link active"
+                            aria-current="page">Search Data</a></li>
+                    <li class="nav-item"><a href="upload.html" class="nav-link active" aria-current="page">Upload &
+                            Analyze Files</a></li>
+                    <li class="nav-item"><a href="DeleteFile.html" class="nav-link active" aria-current="page">Delete
+                            File</a></li>
                 </ul>
             </div>
         </div>
     </nav>
+
+    <style>
+        /* Background image + overlay */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #f0f0f0;
+            position: relative;
+        }
+
+        /* Overlay for readability */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            /* dark overlay */
+            z-index: -1;
+        }
+
+        .navbar-dark.bg-dark {
+            background: linear-gradient(90deg, #2c3e50cc, #000000cc);
+            /* semi-transparent for overlay */
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #f1c40f !important;
+        }
+
+        .carousel-caption h5 {
+            font-size: 2rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 0.3em 0.8em;
+            border-radius: 10px;
+            color: #fdfcfb;
+        }
+
+        header .bg-light {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            color: #2c3e50;
+        }
+
+        h1.display-5 {
+            color: #8e44ad;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #8e44ad, #3498db);
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            background: linear-gradient(to right, #3498db, #8e44ad);
+        }
+
+        footer.bg-dark {
+            background-color: #1a1a1a !important;
+        }
+
+        footer p {
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            color: #ccc;
+        }
+
+        .carousel-item img {
+            filter: brightness(85%);
+            border-radius: 10px;
+        }
+
+        .text-center.mt-3 .btn-lg {
+            margin: 0 10px;
+        }
+
+        @media (max-width: 768px) {
+            .display-5 {
+                font-size: 1.8rem;
+            }
+
+            .fs-4 {
+                font-size: 1rem;
+            }
+
+            .carousel-caption h5 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+
     <!-- Header-->
     <header class="py-5">
         <div class="container px-lg-5">
-            <div class="p-4 p-lg-5 bg-light rounded-3 text-center">
+            <div class="bg-light rounded-3 text-center mx-auto" style="max-width: 900px;">
                 <img src="assets/logo.png" alt="Diamond Cliff Food Analysis" class="img-fluid mb-4 mt-n5"
                     style="max-width: 25%; height: auto; border-radius: 10px;">
                 <div class="m-4 m-lg-5">
@@ -44,12 +153,13 @@
                         Cliff, categorized by country. We analyze customer orders from various nations and rank the most
                         popular dishes, providing valuable insights into the top culinary preferences of our
                         international guests.</p>
-                    <!-- <a class="btn btn-primary btn-lg" href="#!">Call to action</a> -->
                 </div>
             </div>
         </div>
     </header>
-    <h2 class="display-6 fw-bold text-center">Annual Popular Dishes</h2>
+
+    <h2 class="display-6 fw-bold text-center" style="color: #fdfcfb;">Annual Popular Dishes</h2>
+
     <!-- Page Content-->
     <section class="pt-4">
         <div class="container px-lg-5">
@@ -58,34 +168,23 @@
                 <div id="countryCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <img src="assets/Denmark.jpg" class="d-block w-100" alt="Denmark">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Denmark</h5>
-                            </div>
+                            <img src="assets/ABF Package Adult.png" class="d-block mx-auto" style="width: 60%;"
+                                alt="ABF Package Adult">
                         </div>
                         <div class="carousel-item">
-                            <img src="assets/GreatBritain.jpg" class="d-block w-100" alt="Great Britain">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Great Britain</h5>
-                            </div>
+                            <img src="assets/ABF Package Child.png" class="d-block mx-auto" style="width: 60%;"
+                                alt="ABF Package Child">
                         </div>
                         <div class="carousel-item">
-                            <img src="assets/Russia.jpg" class="d-block w-100" alt="Russia">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Russia</h5>
-                            </div>
+                            <img src="assets/Fries.png" class="d-block mx-auto" style="width: 60%;" alt="Fries">
                         </div>
                         <div class="carousel-item">
-                            <img src="assets/Japan.jpg" class="d-block w-100" alt="Japan">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Japan</h5>
-                            </div>
+                            <img src="assets/Margherita Pizza.png" class="d-block mx-auto" style="width: 60%;"
+                                alt="Margherita Pizza">
                         </div>
                         <div class="carousel-item">
-                            <img src="assets/Spain.jpg" class="d-block w-100" alt="Spain">
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Spain</h5>
-                            </div>
+                            <img src="assets/Truffle Fries.png" class="d-block mx-auto" style="width: 60%;"
+                                alt="Truffle Fries">
                         </div>
                     </div>
                     <!-- ปุ่มควบคุมสไลด์ -->
@@ -103,7 +202,9 @@
             </div>
         </div>
         <div class="text-center mt-3 mb-5">
-            <a href="SearchAnalysis.html" class="btn btn-primary btn-lg">Start Your Analysis</a>
+            <a href="SearchAnalysis.html" class="btn btn-primary btn-lg">Search Data</a>
+            <a href="upload.html" class="btn btn-primary btn-lg">Upload & Analyze Files</a>
+            <a href="DeleteFile.html" class="btn btn-primary btn-lg">Delete File</a>
         </div>
     </section>
 
@@ -114,6 +215,7 @@
                 284 Prabaramee Road, Patong Beach, Phuket, Thailand 83150</p>
         </div>
     </footer>
+
     <!-- Bootstrap core JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Core theme JS-->
