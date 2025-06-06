@@ -6,6 +6,7 @@ from openpyxl.styles import Alignment, Border, Side
 import shutil
 import datetime
 from flask_cors import CORS
+from openpyxl.utils import get_column_letter
 
 app = Flask(__name__)
 app.secret_key = 'my_secret_key_1234'  # ใช้สำหรับ flash message
@@ -82,6 +83,31 @@ def add_table_borders(sheet):
         for cell in row:
             cell.border = thin_border
     print("เพิ่มขอบตารางเสร็จสิ้น!")
+
+
+def remove_empty_columns(file_path):
+    df = pd.read_excel(file_path)
+    to_remove = []
+    for col in df.columns:
+        # ลบเฉพาะคอลัมน์ที่ว่างเปล่าทั้งหมด
+        if df[col].isna().all():
+            to_remove.append(col)
+    if to_remove:
+        df.drop(columns=to_remove, inplace=True)
+        df.to_excel(file_path, index=False)
+        # แปลงชื่อ 'Unnamed: X' เป็น Excel letter
+        converted = []
+        for name in to_remove:
+            if name.startswith("Unnamed: "):
+                col_index = int(name.replace("Unnamed: ", ""))
+                converted.append(get_column_letter(col_index + 1))
+            else:
+                converted.append(name)
+        print(f"คอลัมน์ว่างคือ: {converted}")
+        print("ลบคอลัมน์ว่างแล้ว")
+    else:
+        print("ไม่มีคอลัมน์ว่างให้ลบ")
+    return df
 
 
 # ฟังก์ชันปรับขนาดความกว้างคอลัมน์ให้พอดีกับข้อมูล
@@ -204,6 +230,7 @@ def process_uploaded_file(file, upload_folder, file_type):
     print("กำลังบันทึกไฟล์")
     data.to_excel(file_path, index=False)
 
+    remove_empty_columns(file_path)
     rename_sheet_to_sheets1(file_path)
     adjust_column_width(data, file_path)
 
@@ -253,10 +280,6 @@ def merge_files(folder_path, output_filename):
             columns_to_check = None
 
         print(f"🔍 พบแถวที่ซ้ำกันทั้งหมด: {df.duplicated().sum()} แถว")
-        # print("Unit Price(หลังรวม)", df["Unit Price"].astype(
-        #     str).apply(lambda x: f"[{x}]" if x.isspace() else x))
-        # print("Sales(หลังรวม)", df["Sales"].astype(str).apply(
-        #     lambda x: f"[{x}]" if x.isspace() else x))
 
         merged_data.append(df)
 
@@ -340,22 +363,35 @@ def analyze_data():
     print("กำลังอ่านข้อมูลจากไฟล์ที่รวมแล้ว...")
     merged_df = pd.read_excel(merged_output_path)
 
-    # วิเคราะห์ข้อมูล (เหมือนกับ Pivot Table)
+    #  กรองเฉพาะ Major Group ที่ต้องการเท่านั้น
+    print("กำลังกรอง Major Group เฉพาะกลุ่มที่ต้องการ...")
+    valid_major_groups = [
+        "Food", "Wine", "Beer", "Non Alc Bev",
+        "Spirit", "Misc", "Tobacco", "Gift Shop",
+        "Boutique"
+    ]
+    merged_df = merged_df[merged_df["Major Group"].isin(valid_major_groups)]
+
+    # วิเคราะห์ข้อมูล (คล้าย Pivot Table)
     print("กำลังทำการวิเคราะห์ข้อมูล...")
     analysis_df = merged_df.groupby(
-        ['Business Date', 'Country', 'Major Group', 'Menu Item Name'], as_index=False)['Sales Count'].sum()
+        ['Business Date', 'Country', 'Major Group', 'Menu Item Name'],
+        as_index=False
+    )['Sales Count'].sum()
 
-    # บันทึกผลการวิเคราะห์
+    # เรียงข้อมูลตามวันที่
+    analysis_df = analysis_df.sort_values(by='Business Date')
+
+    # บันทึกผลการวิเคราะห์เป็น Excel
     analysis_output_path = os.path.join(MERGE_FOLDER, 'analyzed_output.xlsx')
-    print(f"กำลังบันทึกผลการวิเคราะห์ไปที่ {analysis_output_path}...")
+    print(f"กำลังบันทึกผลการวิเคราะห์ไปที่ {analysis_output_path} ...")
     analysis_df.to_excel(analysis_output_path, index=False)
+
     rename_sheet_to_sheets1(analysis_output_path)
     adjust_column_width(analysis_df, analysis_output_path)
 
-    flash("Data analyzed successfully.", "success")
-    print("การวิเคราะห์ข้อมูลเสร็จสมบูรณ์!")
-    # rename_sheet_to_sheets1(analysis_output_path)
-    # adjust_column_width(analysis_df,analysis_output_path)
+    print("วิเคราะห์ข้อมูลเสร็จสมบูรณ์")
+    flash("Data analysis completed successfully.", "success")
     return analysis_output_path
 
 

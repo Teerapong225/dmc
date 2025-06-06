@@ -150,7 +150,7 @@
                 const formData = new FormData(form);
 
                 try {
-                    const response = await fetch('http://127.0.0.1:5000/upload', {
+                    const response = await fetch('/upload', {
                         method: 'POST',
                         body: formData
                     });
@@ -181,7 +181,7 @@
                 const option = document.getElementById('mergeOption').value;
 
                 try {
-                    const res = await fetch('http://127.0.0.1:5000/merge', {
+                    const res = await fetch('/merge', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ mergeOption: option })
@@ -197,7 +197,7 @@
                 e.preventDefault();
                 const option = document.getElementById('processOption').value;
                 try {
-                    const res = await fetch('http://127.0.0.1:5000/process', {
+                    const res = await fetch('/process', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ processOption: option })

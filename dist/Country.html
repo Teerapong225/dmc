@@ -203,7 +203,7 @@
         document.getElementById("dateFrom").innerText = "Date: " + dateFrom + " - " + dateTo;
         document.getElementById("selectedFoodType").innerText = "" + selectedFoodType;
 
-        fetch(`http://127.0.0.1:5000/get_data?country=${encodeURIComponent(selectedCountry)}&foodType=${encodeURIComponent(selectedFoodType)}&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`)
+        fetch(`/get_data?country=${encodeURIComponent(selectedCountry)}&foodType=${encodeURIComponent(selectedFoodType)}&dateFrom=${encodeURIComponent(dateFrom)}&dateTo=${encodeURIComponent(dateTo)}`)
             .then(response => response.json())
             .then(data => {
                 let resultsContainer = document.getElementById("results");
